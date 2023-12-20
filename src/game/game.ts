@@ -25,7 +25,7 @@ export function maxPlayer() {
   return lobby.maxPlayer()
 }
 
-export function isGameStarted(){
+export function isGameStarted() {
   return machine.currentStateId !== 'LOBBY'
 }
 

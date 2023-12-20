@@ -38,7 +38,7 @@ export default class Lobby {
       this.master = random32bit([...this.players.keys()])
     }
     const phrase = this.deck.getPhraseCard()
-    
+
     this.numberToChose = phrase.reduce((tot, x) => tot + (x === '' ? 1 : 0), 0)
     this.players.forEach((player, key) => {
       if (player.cards.length < maxCardsInHands) {
@@ -61,7 +61,6 @@ export default class Lobby {
       id,
       n.map(e => cards[n[e]])
     )
-    
   }
   isChoseCardComplete() {
     return this.players.size - 1 <= this.chosenCards.size
@@ -72,7 +71,7 @@ export default class Lobby {
       player.ws.send(!this.isMaster(key) ? 'waitChoseWinner' : 'choseWinner', payload)
     })
   }
-  choseWinner(n: number) {    
+  choseWinner(n: number) {
     const playerId = [...this.chosenCards.keys()][n]
     this.players.get(playerId)!.points++
 
