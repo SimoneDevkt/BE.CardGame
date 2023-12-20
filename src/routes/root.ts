@@ -1,7 +1,9 @@
 import { FastifyPluginAsync } from 'fastify'
 import { SocketStream } from '@fastify/websocket'
 import MySocket from '../game/mysocket.js'
-import { joinLobby, maxPlayer } from '../game/game.js'
+import { joinLobby, maxPlayer, isGameStarted } from '../game/game.js'
+
+import { S } from 'fluent-json-schema'
 
 const root: FastifyPluginAsync = async (fastify /*opts*/): Promise<void> => {
   const { httpErrors, websocketServer } = fastify
@@ -10,13 +12,20 @@ const root: FastifyPluginAsync = async (fastify /*opts*/): Promise<void> => {
 
   fastify.addHook('preValidation', async (/*request, /*reply*/) => {
     // check if the request is authenticated
-    if (websocketServer.clients.size > maxPlayer() - 1) {
+    if (isGameStarted() || websocketServer.clients.size > maxPlayer() - 1) {
       throw httpErrors.gone()
     }
   })
 
-  fastify.get('/', { websocket: true }, (connection: SocketStream /*req: FastifyRequest*/) => {
-    joinLobby(new MySocket(connection.socket))
+  const schema = {
+    querystring: S.object().prop('nick', S.string())
+  }
+  fastify.get<{
+    Querystring: {
+      nick: string
+    }
+  }>('/', { schema, websocket: true }, (connection: SocketStream, req) => {
+    joinLobby(new MySocket(connection.socket), req.query.nick)
   })
 }
 
