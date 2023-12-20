@@ -30,12 +30,12 @@ export default class MySocket {
   on<T extends payload>(method: string, cb: (payload: T) => void): void {
     this.socket.on(`my_${method}`, cb)
   }
-  send<T>(method: string, payload: T): void {
+  send<T extends payload>(method: string, payload: T): void {
     if (this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify({ method, payload }))
     }
   }
-  static broadcast<T>(method: string, payload: T) {
+  static broadcast<T extends payload>(method: string, payload: T) {
     this.websocketServer.clients.forEach(function each(client) {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({ method, payload }))
