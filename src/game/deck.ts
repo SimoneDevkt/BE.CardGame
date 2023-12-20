@@ -1,10 +1,6 @@
-export interface Phrases {
-  phrase: string[]
-}
+export type Phrases = string[]
 
-export interface Words {
-  word: string
-}
+export type Words = string
 
 export default class Deck {
   constructor(
@@ -25,12 +21,11 @@ export default class Deck {
     }
     const n = Math.floor(Math.random() * l) //chose random card
 
-    const ris = deck[n] //salvo il valore
-    deck.splice(n, 1) //elimino il valore
+    const [ris] = deck.splice(n, 1) //get value
     return ris
   }
-  getPhraseCards(n = 1): Phrases[] {
-    return this.getCards(this.cardsPhrases, n)
+  getPhraseCard(): Phrases {
+    return this.getCard(this.cardsPhrases)
   }
   getWordCards(n = 1): Words[] {
     return this.getCards(this.cardsWords, n)

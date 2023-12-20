@@ -1,15 +1,15 @@
 import { State } from 'fiume'
 import Lobby from '../lobby.js'
 
-const stateChoseWinner: (lobby: Lobby) => State = () => {
+const stateChoseWinner: (lobby: Lobby) => State = lobby => {
   return {
     id: 'CHOSEWINNER',
-    transitionGuard: ({ event }) => event === 'chose winner' || event === 'finish', // master chose card winner
-    transitionTo: ({ event }) => {
-      if (event === 'chose winner') {
-        return 'NEXTMANCHE'
-      }
-      return 'FINISH'
+    onEntry: () => {
+      lobby.choseWinnerStart()
+    },
+    transitionGuard: ({ event }) => event === 'chose winner', // master chose card winner
+    transitionTo: () => {
+      return lobby.isGameFinished() ? 'FINISH' : 'CHOSECARD'
     }
   }
 }

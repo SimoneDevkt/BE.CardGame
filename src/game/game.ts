@@ -25,32 +25,38 @@ export function maxPlayer() {
   return lobby.maxPlayer()
 }
 
-export function joinLobby(mySocket: MySocket) {
+export function isGameStarted(){
+  return machine.currentStateId !== 'LOBBY'
+}
+
+export function joinLobby(mySocket: MySocket, nickname: string) {
+  const { id } = mySocket
   function exit() {
-    lobby.delete(mySocket.id)
+    lobby.delete(id)
   }
-  lobby.add(mySocket)
+  lobby.add(mySocket, nickname)
   mySocket.onclose(exit)
   mySocket.onerror(exit)
 
-  /*mySocket.send<number>('message1', 3222)
-
-  mySocket.on<string>('message2', string1 => {
-    console.log(string1)
-    MySocket.broadcast<number>('test', 34)
-  })*/
-
-  MySocket.broadcast<string>('newUser', `number of player: ${lobby.size}`)
+  lobby.sendPoints()
 
   mySocket.on<string>('start', async () => {
-    if (lobby.isHost(mySocket.id)) {
+    if (lobby.isHost(id)) {
       await machine.send('start')
-      // console.log(machine.currentStateId) // CHOSECARD
     }
   })
 
-  mySocket.on<number[]>('cardChose', async (n) => {
-    lobby.choseCard(mySocket.id, n)
-    await machine.send('chose card')
+  mySocket.on<number[]>('choseCards', async n => {
+    if (!lobby.isMaster(id)) {
+      lobby.choseCard(id, n)
+      await machine.send('chose card')
+    }
+  })
+
+  mySocket.on<number>('choseWinner', async n => {
+    if (lobby.isMaster(id)) {
+      lobby.choseWinner(n)
+      await machine.send('chose winner')
+    }
   })
 }

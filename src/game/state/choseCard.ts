@@ -8,10 +8,11 @@ const stateChoseCard: (lobby: Lobby) => State = lobby => {
       lobby.nextManche()
     },
     transitionGuard: ({ event }) => {
-        if(lobby.isChoseCardComplete()){
-            return event === 'chose card'
-        }
-        return false
+      // TODO add timeout if some player didn't send a card
+      if (lobby.isChoseCardComplete()) {
+        return event === 'chose card'
+      }
+      return false
     }, // all player chose card
     transitionTo: () => 'CHOSEWINNER'
   }
