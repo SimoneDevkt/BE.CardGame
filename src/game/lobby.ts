@@ -51,7 +51,11 @@ export default class Lobby {
       player.ws.send(this.isMaster(key) ? 'nextMancheMaster' : 'nextManche', payload)
     })
   }
-  choseCard(id: string, n: number[]) {
+  choseCard(id: string, n: number[]) {    
+    if(this.chosenCards.has(id)){
+      this.players.get(id)?.ws.send<string>('error', `cards already send`)
+      return
+    }
     if (n.length !== this.numberToChose) {
       this.players.get(id)?.ws.send<string>('error', `required ${this.numberToChose} cards`)
       return
@@ -59,7 +63,7 @@ export default class Lobby {
     const { cards } = this.players.get(id)!
     this.chosenCards.set(
       id,
-      n.map(e => cards[n[e]])
+      n.map(e => cards.splice(e, 1)[0])
     )
   }
   isChoseCardComplete() {
@@ -104,13 +108,15 @@ export default class Lobby {
     this.players.set(ws.id, initial)
     if (this.host === '') {
       this.host = ws.id
+      ws.send('youAreHost', {})
     }
   }
   delete(id: string) {
     this.players.delete(id)
     if (this.host === id) {
       const [first] = this.players.keys()
-      this.host = first ?? ''
+      this.host = first ?? ''      
+      this.players.get(first)?.ws.send('youAreHost', {})
     }
   }
   isHost(id: string) {
